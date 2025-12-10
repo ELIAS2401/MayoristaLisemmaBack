@@ -4,8 +4,15 @@
   "description": "Backend de aplicación para mayorista de bebidas",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --watch src --exec ts-node src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "seed": "ts-node prisma/seed.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "prisma": {
+    "schema": "prisma/schema.prisma",
+    "seed": "ts-node prisma/seed.ts"
   },
   "repository": {
     "type": "git",
@@ -20,17 +27,18 @@
   },
   "homepage": "https://github.com/ELIAS2401/MayoristaLisemmaBack#readme",
   "dependencies": {
-    "@prisma/client": "^7.1.0",
+    "@prisma/client": "^5.11.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "prisma": "^5.11.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^24.10.1",
-    "nodemon": "^3.1.11",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
 }

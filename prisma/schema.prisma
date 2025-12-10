@@ -1,13 +1,82 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
 
 generator client {
   provider = "prisma-client-js"
 }
- 
-datasource db {
-  provider = "mysql"
+
+model Usuario {
+  id            Int           @id @default(autoincrement())
+  dni           String        @unique
+  nombre        String
+  apellido      String
+  telefono      String?
+  direccion     String?
+  zona          String?
+  email         String?
+  password      String
+  creadoEn      DateTime      @default(now())
+  tipoUsuario   Tipo_Usuario? @relation(fields: [tipoUsuarioId], references: [id])
+  tipoUsuarioId Int?          @default(1)
+  ventas        Venta[]
+}
+
+model Tipo_Usuario {
+  id          Int       @id @default(autoincrement())
+  descripcion String?
+  usuarios    Usuario[]
+}
+
+model Categoria {
+  id        Int        @id @default(autoincrement())
+  nombre    String
+  productos Producto[]
+}
+
+model Producto {
+  id             Int            @id @default(autoincrement())
+  nombre         String
+  categoriaId    Int?
+  categoria      Categoria?     @relation(fields: [categoriaId], references: [id])
+  stock          Int            @default(0)
+  costoUnitario  Decimal        @db.Decimal(10, 2)
+  precioUnitario Decimal        @db.Decimal(10, 2)
+  creadoEn       DateTime       @default(now())
+  detalleVentas  DetalleVenta[]
+}
+
+model Cliente {
+  id            Int     @id @default(autoincrement())
+  nombreNegocio String
+  nombreDueno   String?
+  telefono      String?
+  direccion     String?
+  zona          String?
+  email         String?
+  ventas        Venta[]
+  cuit          String  @unique
+}
+
+model Venta {
+  id        Int            @id @default(autoincrement())
+  fecha     DateTime       @default(now())
+  clienteId Int?
+  cliente   Cliente?       @relation(fields: [clienteId], references: [id])
+  usuarioId Int
+  usuario   Usuario        @relation(fields: [usuarioId], references: [id])
+  total     Decimal        @db.Decimal(10, 2)
+  detalles  DetalleVenta[]
+}
+
+model DetalleVenta {
+  id             Int     @id @default(autoincrement())
+  ventaId        Int
+  productoId     Int
+  cantidad       Int
+  precioUnitario Decimal @db.Decimal(10, 2) /// precio unitario al momento de la venta
+
+  venta    Venta    @relation(fields: [ventaId], references: [id])
+  producto Producto @relation(fields: [productoId], references: [id])
 }
