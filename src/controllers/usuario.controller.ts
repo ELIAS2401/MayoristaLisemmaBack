@@ -1,0 +1,34 @@
+import { UsuarioRepository } from './../repository/usuario.repository';
+import { type Request, type Response } from "express";
+import { UsuarioService } from "../services/usuario.service.ts";
+
+const usuarioRepository = new UsuarioRepository();
+const usuarioService = new UsuarioService(usuarioRepository);
+
+export class UsuarioController {
+
+    constructor() { }
+
+    public registro = async (req: Request, res: Response) => {
+        try {
+            const { nombre, apellido, email, direccion, dni, password } = req.body;
+
+            const usuario = await usuarioService.crearUsuario(
+                nombre,
+                apellido,
+                email,
+                direccion,
+                dni,
+                password
+            );
+
+            return res.status(201).json(usuario);
+
+        } catch (error: any) {
+            return res.status(400).json({
+                message: error.message || 'Error al registrar usuario'
+            });
+        }
+    };
+
+}
