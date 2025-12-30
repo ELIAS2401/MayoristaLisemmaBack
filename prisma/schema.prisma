@@ -1,82 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-model Usuario {
-  id            Int           @id @default(autoincrement())
-  dni           String        @unique
-  nombre        String
-  apellido      String
-  telefono      String?
-  direccion     String?
-  zona          String?
-  email         String?       @unique
-  password      String
-  creadoEn      DateTime      @default(now())
-  tipoUsuario   Tipo_Usuario? @relation(fields: [tipoUsuarioId], references: [id])
-  tipoUsuarioId Int?          @default(1)
-  ventas        Venta[]
-}
-
-model Tipo_Usuario {
-  id          Int       @id @default(autoincrement())
-  descripcion String?
-  usuarios    Usuario[]
-}
-
-model Categoria {
+model categoria {
   id        Int        @id @default(autoincrement())
   nombre    String
-  productos Producto[]
+
+  productos producto[]
 }
 
-model Producto {
-  id             Int            @id @default(autoincrement())
-  nombre         String
-  categoriaId    Int?
-  categoria      Categoria?     @relation(fields: [categoriaId], references: [id])
-  stock          Int            @default(0)
-  costoUnitario  Decimal        @db.Decimal(10, 2)
-  precioUnitario Decimal        @db.Decimal(10, 2)
-  creadoEn       DateTime       @default(now())
-  detalleVentas  DetalleVenta[]
-}
-
-model Cliente {
-  id            Int     @id @default(autoincrement())
+model cliente {
+  id            Int      @id @default(autoincrement())
   nombreNegocio String
   nombreDueno   String?
   telefono      String?
   direccion     String?
   zona          String?
   email         String?
-  ventas        Venta[]
-  cuit          String  @unique
+  cuit          String   @unique
+
+  ventas        venta[]
 }
 
-model Venta {
-  id        Int            @id @default(autoincrement())
-  fecha     DateTime       @default(now())
+model producto {
+  id             Int      @id @default(autoincrement())
+  nombre         String
+  categoriaId    Int?
+  stock          Int      @default(0)
+  costoUnitario  Decimal  @db.Decimal(10, 2)
+  precioUnitario Decimal  @db.Decimal(10, 2)
+  creadoEn       DateTime @default(now())
+
+  categoria      categoria?     @relation(fields: [categoriaId], references: [id])
+  detalles       detalleventa[]
+}
+
+model venta {
+  id        Int      @id @default(autoincrement())
+  fecha     DateTime @default(now())
   clienteId Int?
-  cliente   Cliente?       @relation(fields: [clienteId], references: [id])
   usuarioId Int
-  usuario   Usuario        @relation(fields: [usuarioId], references: [id])
-  total     Decimal        @db.Decimal(10, 2)
-  detalles  DetalleVenta[]
+  total     Decimal  @db.Decimal(10, 2)
+  estado    String   @default("ACTIVA") // ACTIVA | ANULADA
+
+  cliente   cliente?      @relation(fields: [clienteId], references: [id])
+  usuario   usuario       @relation(fields: [usuarioId], references: [id])
+  detalles  detalleventa[]
 }
 
-model DetalleVenta {
-  id             Int     @id @default(autoincrement())
+model detalleventa {
+  id             Int      @id @default(autoincrement())
   ventaId        Int
   productoId     Int
   cantidad       Int
-  precioUnitario Decimal @db.Decimal(10, 2) /// precio unitario al momento de la venta
+  precioUnitario Decimal  @db.Decimal(10, 2)
 
-  venta    Venta    @relation(fields: [ventaId], references: [id])
-  producto Producto @relation(fields: [productoId], references: [id])
+  venta    venta    @relation(fields: [ventaId], references: [id])
+  producto producto @relation(fields: [productoId], references: [id])
+
+  @@index([ventaId])
+  @@index([productoId])
+}
+
+model tipo_usuario {
+  id          Int      @id @default(autoincrement())
+  descripcion String?
+
+  usuarios    usuario[]
+}
+
+model usuario {
+  id            Int      @id @default(autoincrement())
+  dni           String   @unique
+  nombre        String
+  apellido      String
+  telefono      String?
+  direccion     String?
+  zona          String?
+  email         String?
+  password      String
+  creadoEn      DateTime @default(now())
+  tipoUsuarioId Int?     @default(1)
+
+  tipoUsuario tipo_usuario? @relation(fields: [tipoUsuarioId], references: [id])
+  ventas      venta[]
 }

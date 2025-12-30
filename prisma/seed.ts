@@ -6,11 +6,11 @@ async function main() {
   // -----------------------
   // 1. ROLES
   // -----------------------
-  const adminRole = await prisma.tipo_Usuario.create({
+  const adminRole = await prisma.tipo_usuario.create({
     data: { descripcion: "Admin" }
   });
 
-  const vendedorRole = await prisma.tipo_Usuario.create({
+  const vendedorRole = await prisma.tipo_usuario.create({
     data: { descripcion: "Vendedor" }
   });
 

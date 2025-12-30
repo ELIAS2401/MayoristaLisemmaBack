@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { ProductoController } from "../../controllers/producto.controller.ts";
 
+////////////////////////////DEBO PONER EN VENTA CONTROLER EL SERVICIO  Y NO EN EL CONTSTRUCTOR ME PARECE
 const productoRouter = Router();
 const productoController = new ProductoController();
 
