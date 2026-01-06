@@ -31,7 +31,7 @@ export class UsuarioController {
         }
     };
 
-    public login = async (req: Request, res: Response) => {console.log(req.body);
+    public login = async (req: Request, res: Response) => {
         try {
             const { email, password } = req.body;
 

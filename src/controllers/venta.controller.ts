@@ -11,7 +11,6 @@ export class VentaController {
 
     public crearVenta = async (req: Request, res: Response) => {
         try {
-            console.log('BODY:', req.body); // 👈 👈 👈
             const { clienteId, total, detalles } = req.body;
 
             if (!detalles || detalles.length === 0) {
