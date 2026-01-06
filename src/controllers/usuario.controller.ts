@@ -31,4 +31,18 @@ export class UsuarioController {
         }
     };
 
+    public login = async (req: Request, res: Response) => {console.log(req.body);
+        try {
+            const { email, password } = req.body;
+
+            const result = await usuarioService.login(email, password);
+
+            return res.status(200).json(result);
+
+        } catch (error: any) {
+            return res.status(401).json({
+                message: error.message || 'Credenciales inválidas'
+            });
+        }
+    };
 }

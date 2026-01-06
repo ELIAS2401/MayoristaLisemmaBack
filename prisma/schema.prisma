@@ -82,7 +82,7 @@ model usuario {
   telefono      String?
   direccion     String?
   zona          String?
-  email         String?
+  email         String? @unique
   password      String
   creadoEn      DateTime @default(now())
   tipoUsuarioId Int?     @default(1)

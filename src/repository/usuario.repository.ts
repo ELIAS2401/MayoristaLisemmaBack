@@ -1,7 +1,7 @@
 import { prisma } from "../prisma.ts";
 
 export class UsuarioRepository {
-    
+
     async createUsuario(data: {
         dni: string;
         nombre: string;
@@ -34,6 +34,11 @@ export class UsuarioRepository {
             where: { dni }
         });
     }
-
+    
+    async findByEmailWithPassword(email: string) {
+        return prisma.usuario.findUnique({
+            where: { email }
+        });
+    }
 
 }
