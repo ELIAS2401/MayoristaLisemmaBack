@@ -1,6 +1,6 @@
 import { type Request, type Response } from "express";
-import { ProductoService } from "../services/producto.service.ts";
-import { ProductoRepository } from "../repository/producto.repository.ts";
+import { ProductoService } from "../services/producto.service.js";
+import { ProductoRepository } from "../repository/producto.repository.js";
 
 const productoRepository = new ProductoRepository();
 const productoService = new ProductoService(productoRepository);

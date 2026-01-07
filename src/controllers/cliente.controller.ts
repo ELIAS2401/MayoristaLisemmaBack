@@ -1,6 +1,6 @@
 import { type Request, type Response } from "express";
-import { ClienteService } from "../services/cliente.service.ts";
-import { ClienteRepository } from "../repository/cliente.repository.ts";
+import { ClienteService } from "../services/cliente.service.js";
+import { ClienteRepository } from "../repository/cliente.repository.js";
 
 
 const clienteRepository = new ClienteRepository();

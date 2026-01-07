@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { VentaService } from '../services/venta.service.ts';
-import { VentaRepository } from '../repository/venta.repository.ts';
+import { VentaService } from '../services/venta.service.js';
+import { VentaRepository } from '../repository/venta.repository.js';
 
 const ventaRepository = new VentaRepository();
 const ventaService = new VentaService(ventaRepository);
