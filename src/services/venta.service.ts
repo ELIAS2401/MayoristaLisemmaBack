@@ -1,4 +1,4 @@
-import { VentaRepository } from "../repository/venta.repository.ts";
+import { VentaRepository } from "../repository/venta.repository.js";
 export class VentaService {
 
     constructor(private ventaRepository: VentaRepository) { }

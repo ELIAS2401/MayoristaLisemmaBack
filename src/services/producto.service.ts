@@ -1,4 +1,4 @@
-import { ProductoRepository } from "../repository/producto.repository.ts";
+import { ProductoRepository } from "../repository/producto.repository.js";
 export class ProductoService {
 
     constructor(private productoRepository: ProductoRepository) { }
