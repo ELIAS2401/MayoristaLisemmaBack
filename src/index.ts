@@ -6,7 +6,10 @@ import { AppRoutes } from "./routes/routes.js";
 
 const app = express();
 app.use(cors({
-  origin: "http://localhost:4200",
+  origin: [
+    'http://localhost:4200',
+    'https://elias2401.github.io'
+  ],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
