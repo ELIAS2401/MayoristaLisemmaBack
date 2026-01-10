@@ -28,7 +28,7 @@ export const authMiddleware = (
       token,
       process.env.JWT_SECRET as string
     ) as JwtPayload;
-
+console.log("TOKEN DECODIFICADO:", decoded);
     // 🔥 acá dejamos el usuario disponible
     req.user = {
       id: decoded.id,

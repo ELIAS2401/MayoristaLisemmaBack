@@ -11,6 +11,7 @@ export class VentaController {
 
     public crearVenta = async (req: Request, res: Response) => {
         try {
+            console.log("USER EN REQUEST:", req.user);
             const { clienteId, total, detalles } = req.body;
             const usuarioId = req.user.id; // 👈 VIENE DEL TOKEN
 
