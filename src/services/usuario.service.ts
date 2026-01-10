@@ -54,8 +54,12 @@ export class UsuarioService {
         }
 
         const token = jwt.sign(
-            { userId: user.id, tipoUsuarioId: user.tipoUsuarioId },
-            process.env.JWT_SECRET || 'secret',
+            {
+                id: user.id,           
+                email: user.email,
+                tipoUsuarioId: user.tipoUsuarioId
+            },
+            process.env.JWT_SECRET!,
             { expiresIn: '8h' }
         );
 

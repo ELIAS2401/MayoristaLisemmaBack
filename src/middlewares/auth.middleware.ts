@@ -18,7 +18,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
   try {
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
 
-    // 🔴 DEBUG DURO
+    // DEBUG 
     if (!decoded.id) {
       return res.status(401).json({
         message: "TOKEN_SIN_ID",
