@@ -12,6 +12,7 @@ export class VentaController {
     public crearVenta = async (req: Request, res: Response) => {
         try {
             const { clienteId, total, detalles } = req.body;
+            const usuarioId = req.user.id; // 👈 VIENE DEL TOKEN
 
             if (!detalles || detalles.length === 0) {
                 return res.status(400).json({ message: "La venta debe tener al menos un producto" });
@@ -20,7 +21,8 @@ export class VentaController {
             const venta = await ventaService.crearVenta({
                 clienteId,
                 total,
-                detalles
+                detalles,
+                usuarioId
             });
 
             res.status(201).json(venta);

@@ -9,6 +9,7 @@ export class VentaService {
 
     async crearVenta(data: {
         clienteId?: number;
+        usuarioId: number;
         total: number;
         detalles: {
             productoId: number;

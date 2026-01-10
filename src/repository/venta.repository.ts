@@ -18,6 +18,7 @@ export class VentaRepository {
 
     async crearVentaConDetalleYStock(data: {
         clienteId?: number;
+        usuarioId: number;
         total: number;
         detalles: {
             productoId: number;
@@ -47,7 +48,7 @@ export class VentaRepository {
             const venta = await tx.venta.create({
                 data: {
                     clienteId: data.clienteId,
-                    usuarioId: 1, // ⚠️ después lo sacás del token
+                    usuarioId: data.usuarioId, // ⚠️ después lo sacás del token
                     total: data.total,
                     detalles: {
                         create: data.detalles.map(d => ({
