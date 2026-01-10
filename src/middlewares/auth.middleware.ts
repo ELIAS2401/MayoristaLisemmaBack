@@ -6,37 +6,34 @@ interface JwtPayload {
   email: string;
 }
 
-export const authMiddleware = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
-    return res.status(401).json({ message: "Token no enviado" });
+    return res.status(401).json({ message: "NO_AUTH_HEADER" });
   }
 
   const token = authHeader.split(" ")[1];
 
-  if (!token) {
-    return res.status(401).json({ message: "Token inválido" });
-  }
-
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET as string
-    ) as JwtPayload;
-console.log("TOKEN DECODIFICADO:", decoded);
-    // 🔥 acá dejamos el usuario disponible
+    const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
+
+    // 🔴 DEBUG DURO
+    if (!decoded.id) {
+      return res.status(401).json({
+        message: "TOKEN_SIN_ID",
+        decoded
+      });
+    }
+
     req.user = {
       id: decoded.id,
       email: decoded.email
     };
 
     next();
-  } catch (error) {
-    return res.status(401).json({ message: "Token inválido o expirado" });
+  } catch (err) {
+    return res.status(401).json({ message: "TOKEN_INVALIDO" });
   }
 };
+
