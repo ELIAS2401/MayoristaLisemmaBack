@@ -32,8 +32,12 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     };
 
     next();
-  } catch (err) {
-    return res.status(401).json({ message: "TOKEN_INVALIDO" });
+  } catch (err: any) {
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'TOKEN_EXPIRED' });
+    }
+
+    return res.status(401).json({ message: 'TOKEN_INVALIDO' });
   }
 };
 

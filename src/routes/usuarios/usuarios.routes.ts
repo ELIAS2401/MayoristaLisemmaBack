@@ -6,5 +6,6 @@ const usuarioController = new UsuarioController();
 
 usuarioRouter.post('/registro', usuarioController.registro.bind(usuarioController));
 usuarioRouter.post('/login', usuarioController.login.bind(usuarioController));
+usuarioRouter.post('/refresh', usuarioController.refresh.bind(usuarioController));
 
 export default usuarioRouter;

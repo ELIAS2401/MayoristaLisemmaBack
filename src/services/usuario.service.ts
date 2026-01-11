@@ -44,31 +44,34 @@ export class UsuarioService {
     async login(email: string, password: string) {
         const user = await this.usuarioRepository.findByEmailWithPassword(email);
 
-        if (!user) {
-            throw new Error('Credenciales inválidas');
-        }
+        if (!user) throw new Error('Credenciales inválidas');
 
         const passwordValida = await bcrypt.compare(password, user.password);
-        if (!passwordValida) {
-            throw new Error('Credenciales inválidas');
-        }
+        if (!passwordValida) throw new Error('Credenciales inválidas');
 
-        const token = jwt.sign(
+        const accessToken = jwt.sign(
             {
-                id: user.id,           
+                id: user.id,
                 email: user.email,
                 tipoUsuarioId: user.tipoUsuarioId
             },
             process.env.JWT_SECRET!,
-            { expiresIn: '8h' }
+            { expiresIn: '15m' }
         );
 
-        // ❗ nunca devolver la password
+        const refreshToken = jwt.sign(
+            { id: user.id },
+            process.env.JWT_REFRESH_SECRET!,
+            { expiresIn: '7d' }
+        );
+
         const { password: _, ...userSinPassword } = user;
 
         return {
-            token,
+            accessToken,
+            refreshToken,
             user: userSinPassword
         };
     }
+
 }

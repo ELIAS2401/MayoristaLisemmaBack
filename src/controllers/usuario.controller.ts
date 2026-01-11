@@ -1,7 +1,7 @@
 import { UsuarioRepository } from './../repository/usuario.repository.js';
 import { type Request, type Response } from "express";
 import { UsuarioService } from "../services/usuario.service.js";
-
+import jwt from "jsonwebtoken";
 const usuarioRepository = new UsuarioRepository();
 const usuarioService = new UsuarioService(usuarioRepository);
 
@@ -45,4 +45,31 @@ export class UsuarioController {
             });
         }
     };
+
+    public refresh = async (req: Request, res: Response) => {
+        const { refreshToken } = req.body;
+
+        if (!refreshToken) {
+            return res.status(401).json({ message: 'NO_REFRESH_TOKEN' });
+        }
+
+        try {
+            const decoded = jwt.verify(
+                refreshToken,
+                process.env.JWT_REFRESH_SECRET!
+            ) as any;
+
+            const newAccessToken = jwt.sign(
+                { id: decoded.id },
+                process.env.JWT_SECRET!,
+                { expiresIn: '15m' }
+            );
+
+            return res.json({ accessToken: newAccessToken });
+
+        } catch {
+            return res.status(401).json({ message: 'REFRESH_INVALIDO' });
+        }
+    };
+
 }
