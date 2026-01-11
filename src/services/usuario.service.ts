@@ -56,13 +56,13 @@ export class UsuarioService {
                 tipoUsuarioId: user.tipoUsuarioId
             },
             process.env.JWT_SECRET!,
-            { expiresIn: '10s' }
+            { expiresIn: '30m' }
         );
 
         const refreshToken = jwt.sign(
             { id: user.id },
             process.env.JWT_REFRESH_SECRET!,
-            { expiresIn: '7d' }
+            { expiresIn: '30d' }
         );
 
         const { password: _, ...userSinPassword } = user;
