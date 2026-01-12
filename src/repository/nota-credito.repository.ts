@@ -97,7 +97,11 @@ export class NotaCreditoRepository {
             orderBy: { fecha: 'desc' },
             include: {
                 usuario: true,
-                venta: true,
+                venta: {
+                    include: {
+                        cliente: true
+                    }
+                },
                 detalles: { include: { producto: true } }
             }
         });
