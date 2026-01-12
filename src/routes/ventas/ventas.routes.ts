@@ -12,3 +12,8 @@ ventaRouter.post(
     authMiddleware,
     ventaController.crearVenta.bind(ventaController)
 ); export default ventaRouter;
+ventaRouter.post(
+    '/:id/nota-credito',
+    authMiddleware,
+    ventaController.generarNotaCredito.bind(ventaController)
+);

@@ -7,25 +7,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model categoria {
-  id        Int        @id @default(autoincrement())
-  nombre    String
+  id     Int    @id @default(autoincrement())
+  nombre String
 
   productos producto[]
 }
 
 model cliente {
-  id            Int      @id @default(autoincrement())
+  id            Int     @id @default(autoincrement())
   nombreNegocio String
   nombreDueno   String?
   telefono      String?
   direccion     String?
   zona          String?
   email         String?
-  cuit          String   @unique
+  cuit          String  @unique
 
-  ventas        venta[]
+  ventas venta[]
 }
 
 model producto {
@@ -37,8 +36,10 @@ model producto {
   precioUnitario Decimal  @db.Decimal(10, 2)
   creadoEn       DateTime @default(now())
 
-  categoria      categoria?     @relation(fields: [categoriaId], references: [id])
-  detalles       detalleventa[]
+  categoria categoria?     @relation(fields: [categoriaId], references: [id])
+  detalles  detalleventa[]
+
+  notasCreditoDetalle nota_credito_detalle[]
 }
 
 model venta {
@@ -49,17 +50,18 @@ model venta {
   total     Decimal  @db.Decimal(10, 2)
   estado    String   @default("ACTIVA") // ACTIVA | ANULADA
 
-  cliente   cliente?      @relation(fields: [clienteId], references: [id])
-  usuario   usuario       @relation(fields: [usuarioId], references: [id])
-  detalles  detalleventa[]
+  cliente      cliente?       @relation(fields: [clienteId], references: [id])
+  usuario      usuario        @relation(fields: [usuarioId], references: [id])
+  detalles     detalleventa[]
+  notasCredito nota_credito[]
 }
 
 model detalleventa {
-  id             Int      @id @default(autoincrement())
+  id             Int     @id @default(autoincrement())
   ventaId        Int
   productoId     Int
   cantidad       Int
-  precioUnitario Decimal  @db.Decimal(10, 2)
+  precioUnitario Decimal @db.Decimal(10, 2)
 
   venta    venta    @relation(fields: [ventaId], references: [id])
   producto producto @relation(fields: [productoId], references: [id])
@@ -69,10 +71,10 @@ model detalleventa {
 }
 
 model tipo_usuario {
-  id          Int      @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   descripcion String?
 
-  usuarios    usuario[]
+  usuarios usuario[]
 }
 
 model usuario {
@@ -83,11 +85,41 @@ model usuario {
   telefono      String?
   direccion     String?
   zona          String?
-  email         String? @unique
+  email         String?  @unique
   password      String
   creadoEn      DateTime @default(now())
   tipoUsuarioId Int?     @default(1)
 
-  tipoUsuario tipo_usuario? @relation(fields: [tipoUsuarioId], references: [id])
-  ventas      venta[]
+  tipoUsuario  tipo_usuario?  @relation(fields: [tipoUsuarioId], references: [id])
+  ventas       venta[]
+  notaCreditos nota_credito[]
+}
+
+model nota_credito {
+  id        Int      @id @default(autoincrement())
+  ventaId   Int
+  usuarioId Int // 👈 NUEVO
+  fecha     DateTime @default(now())
+  total     Decimal  @db.Decimal(10, 2)
+
+  venta    venta                  @relation(fields: [ventaId], references: [id])
+  usuario  usuario                @relation(fields: [usuarioId], references: [id])
+  detalles nota_credito_detalle[]
+
+  @@index([ventaId])
+  @@index([usuarioId])
+}
+
+model nota_credito_detalle {
+  id             Int     @id @default(autoincrement())
+  notaCreditoId  Int
+  productoId     Int
+  cantidad       Int
+  precioUnitario Decimal @db.Decimal(10, 2)
+
+  notaCredito nota_credito @relation(fields: [notaCreditoId], references: [id])
+  producto    producto     @relation(fields: [productoId], references: [id])
+
+  @@index([notaCreditoId])
+  @@index([productoId])
 }

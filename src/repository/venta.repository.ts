@@ -108,4 +108,82 @@ export class VentaRepository {
         });
     }
 
+    async generarNotaCredito(
+        ventaId: number,
+        usuarioId: number,
+        items: {
+            productoId: number;
+            cantidad: number;
+            precioUnitario: number;
+        }[]
+    ) {
+        return prisma.$transaction(async (tx) => {
+
+            const venta = await tx.venta.findUnique({
+                where: { id: ventaId },
+                include: { detalles: true }
+            });
+
+            if (!venta || venta.estado === 'ANULADA') {
+                throw new Error('Venta inválida');
+            }
+
+            // Validar cantidades
+            for (const item of items) {
+                const vendido = venta.detalles.find(
+                    d => d.productoId === item.productoId
+                );
+
+                if (!vendido) {
+                    throw new Error('Producto no pertenece a la venta');
+                }
+
+                if (item.cantidad > vendido.cantidad) {
+                    throw new Error('Cantidad a devolver inválida');
+                }
+            }
+
+            const totalCredito = items.reduce(
+                (sum, i) => sum + i.cantidad * i.precioUnitario,
+                0
+            );
+
+            // Crear nota de crédito
+            const nota = await tx.nota_credito.create({
+                data: {
+                    ventaId,
+                    usuarioId,
+                    total: totalCredito,
+                    detalles: {
+                        create: items.map(i => ({
+                            productoId: i.productoId,
+                            cantidad: i.cantidad,
+                            precioUnitario: i.precioUnitario
+                        }))
+                    }
+                }
+            });
+
+            // Restaurar stock
+            for (const i of items) {
+                await tx.producto.update({
+                    where: { id: i.productoId },
+                    data: {
+                        stock: { increment: i.cantidad }
+                    }
+                });
+            }
+
+            // Reducir total de la venta
+            await tx.venta.update({
+                where: { id: ventaId },
+                data: {
+                    total: { decrement: totalCredito }
+                }
+            });
+
+            return nota;
+        });
+    }
+
 }

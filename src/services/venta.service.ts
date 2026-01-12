@@ -23,4 +23,16 @@ export class VentaService {
     public anularVenta = async (ventaId: number) => {
         return this.ventaRepository.anularVenta(ventaId);
     };
+
+    public generarNotaCredito = async (
+        ventaId: number,
+        usuarioId: number,
+        items: {
+            productoId: number;
+            cantidad: number;
+            precioUnitario: number;
+        }[]
+    ) => {
+        return this.ventaRepository.generarNotaCredito(ventaId, usuarioId, items);
+    };
 }
