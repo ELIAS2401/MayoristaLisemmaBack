@@ -61,24 +61,6 @@ export class VentaController {
         }
     };
 
-    public generarNotaCredito = async (req: Request, res: Response) => {
-        try {
-            const ventaId = Number(req.params.id);
-            const usuarioId = Number(req.user.id);
-            const { items } = req.body;
-
-            if (!items || items.length === 0) {
-                return res.status(400).json({ message: 'No hay productos para devolver' });
-            }
-
-            const nota = await ventaService.generarNotaCredito(ventaId, usuarioId, items);
-
-            res.status(201).json(nota);
-        } catch (error: any) {
-            res.status(400).json({
-                message: error.message || 'Error al generar nota de crédito'
-            });
-        }
-    };
+  
 
 }
