@@ -4,7 +4,7 @@ export class NotaCreditoService {
 
     constructor(private repo: NotaCreditoRepository) { }
 
-    crear(
+    async crear(
         ventaId: number,
         usuarioId: number,
         items: {
@@ -20,11 +20,11 @@ export class NotaCreditoService {
         return this.repo.crearNotaCredito(ventaId, usuarioId, items);
     }
 
-    listar() {
+    public listar = async () => {
         return this.repo.listar();
     }
 
-    listarPorVenta(ventaId: number) {
+    public listarPorVenta = async (ventaId: number) => {
         return this.repo.listarPorVenta(ventaId);
     }
 }

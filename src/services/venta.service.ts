@@ -2,7 +2,7 @@ import { VentaRepository } from "../repository/venta.repository.js";
 export class VentaService {
 
     constructor(private ventaRepository: VentaRepository) { }
-
+    
     public obtenerVentas = async () => {
         return this.ventaRepository.obtenerVentas();
     };

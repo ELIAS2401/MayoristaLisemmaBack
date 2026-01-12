@@ -17,7 +17,9 @@ export class NotaCreditoController {
             res.status(201).json(nota);
 
         } catch (e: any) {
-            res.status(400).json({ message: e.message });
+            res.status(400).json({
+                message: e.message || 'Error al generar nota de crédito'
+            });
         }
     };
 
