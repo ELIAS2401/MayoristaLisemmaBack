@@ -95,12 +95,22 @@ model usuario {
   notaCreditos nota_credito[]
 }
 
+enum EstadoNotaCredito {
+  DISPONIBLE
+  PARCIAL
+  USADA
+  ANULADA
+}
+
 model nota_credito {
   id        Int      @id @default(autoincrement())
   ventaId   Int
-  usuarioId Int // 👈 NUEVO
+  usuarioId Int
   fecha     DateTime @default(now())
   total     Decimal  @db.Decimal(10, 2)
+
+  montoUsado Decimal           @default(0) @db.Decimal(10, 2)
+  estado     EstadoNotaCredito @default(DISPONIBLE)
 
   venta    venta                  @relation(fields: [ventaId], references: [id])
   usuario  usuario                @relation(fields: [usuarioId], references: [id])
