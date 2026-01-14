@@ -5,11 +5,11 @@ export class NotaCreditoService {
 
     constructor(private repo: NotaCreditoRepository) { }
 
-    async crear(
+     async crear(
         ventaId: number,
         usuarioId: number,
         items: {
-            productoId: number;
+            ventaDetalleId: number;
             cantidad: number;
             precioUnitario: number;
         }[]
@@ -18,7 +18,6 @@ export class NotaCreditoService {
             throw new Error('La nota debe tener items');
         }
 
-        // 🔎 validar venta y cliente
         const venta = await prisma.venta.findUnique({
             where: { id: ventaId },
             include: { detalles: true }
@@ -32,24 +31,30 @@ export class NotaCreditoService {
             throw new Error('La venta no tiene cliente');
         }
 
-        // ✔ validar que los productos pertenezcan a la venta
+        // ✔ validar que los detalles pertenezcan a la venta
         for (const item of items) {
-            const vendido = venta.detalles.find(
-                d => d.productoId === item.productoId
+            const detalle = venta.detalles.find(
+                d => d.id === item.ventaDetalleId
             );
 
-            if (!vendido) {
-                throw new Error('Producto no pertenece a la venta');
+            if (!detalle) {
+                throw new Error('Detalle no pertenece a la venta');
             }
 
-            if (item.cantidad > vendido.cantidad) {
-                throw new Error('Cantidad inválida para devolver');
+            const disponible =
+                detalle.cantidad - detalle.cantidadAcreditada;
+
+            if (item.cantidad > disponible) {
+                throw new Error(
+                    `Cantidad inválida. Disponible: ${disponible}`
+                );
             }
         }
 
         return this.repo.crearNotaCredito({
             usuarioId,
             clienteId: venta.clienteId,
+            ventaId,
             items
         });
     }

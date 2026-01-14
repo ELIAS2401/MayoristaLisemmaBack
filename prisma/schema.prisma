@@ -39,8 +39,13 @@ model producto {
 
   categoria categoria?     @relation(fields: [categoriaId], references: [id])
   detalles  detalleventa[]
+}
 
-  notasCreditoDetalle nota_credito_detalle[]
+enum EstadoVenta {
+  ACTIVA
+  ANULADA
+  ACREDITADA
+  PARCIALMENTE_ACREDITADA
 }
 
 model venta {
@@ -49,7 +54,7 @@ model venta {
   clienteId Int?
   usuarioId Int
   total     Decimal  @db.Decimal(10, 2)
-  estado    String   @default("ACTIVA")
+  estado EstadoVenta @default(ACTIVA)
 
   notaCreditoId  Int? // 👈 NUEVO
   montoNotaUsado Decimal? @db.Decimal(10, 2) // 👈 NUEVO
@@ -61,14 +66,17 @@ model venta {
 }
 
 model detalleventa {
-  id             Int     @id @default(autoincrement())
-  ventaId        Int
-  productoId     Int
-  cantidad       Int
-  precioUnitario Decimal @db.Decimal(10, 2)
+  id                 Int     @id @default(autoincrement())
+  ventaId            Int
+  productoId         Int
+  cantidad           Int
+  cantidadAcreditada Int     @default(0)
+  precioUnitario     Decimal @db.Decimal(10, 2)
 
   venta    venta    @relation(fields: [ventaId], references: [id])
   producto producto @relation(fields: [productoId], references: [id])
+
+  notasCreditoDetalle nota_credito_detalle[]
 
   @@index([ventaId])
   @@index([productoId])
@@ -109,7 +117,8 @@ enum EstadoNotaCredito {
 model nota_credito {
   id        Int      @id @default(autoincrement())
   usuarioId Int
-  clienteId Int // 👈 CLAVE
+  clienteId Int
+  ventaId   Int?
   fecha     DateTime @default(now())
   total     Decimal  @db.Decimal(10, 2)
 
@@ -125,13 +134,13 @@ model nota_credito {
 model nota_credito_detalle {
   id             Int     @id @default(autoincrement())
   notaCreditoId  Int
-  productoId     Int
+  ventaDetalleId Int
   cantidad       Int
   precioUnitario Decimal @db.Decimal(10, 2)
 
-  notaCredito nota_credito @relation(fields: [notaCreditoId], references: [id])
-  producto    producto     @relation(fields: [productoId], references: [id])
+  notaCredito  nota_credito @relation(fields: [notaCreditoId], references: [id])
+  ventaDetalle detalleventa @relation(fields: [ventaDetalleId], references: [id])
 
   @@index([notaCreditoId])
-  @@index([productoId])
+  @@index([ventaDetalleId])
 }

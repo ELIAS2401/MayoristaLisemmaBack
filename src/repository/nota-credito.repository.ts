@@ -5,54 +5,152 @@ export class NotaCreditoRepository {
     async crearNotaCredito(data: {
         usuarioId: number;
         clienteId: number;
+        ventaId: number;
         items: {
-            productoId: number;
+            ventaDetalleId: number;
             cantidad: number;
-            precioUnitario: number;
         }[];
     }) {
         return prisma.$transaction(async (tx) => {
 
-            const total = data.items.reduce(
-                (sum, i) => sum + i.cantidad * Number(i.precioUnitario),
-                0
-            );
+            // 1️⃣ Validaciones iniciales
+            if (!data.items || data.items.length === 0) {
+                throw new Error('La nota de crédito debe tener al menos un item');
+            }
 
+            const venta = await tx.venta.findUnique({
+                where: { id: data.ventaId }
+            });
+
+            if (!venta) {
+                throw new Error('Venta inexistente');
+            }
+
+            if (venta.estado === 'ANULADA') {
+                throw new Error('No se puede acreditar una venta anulada');
+            }
+
+            if (venta.estado === 'ACREDITADA') {
+                throw new Error('La venta ya fue acreditada completamente');
+            }
+
+            let total = 0;
+
+            // 2️⃣ Procesar cada item
+            for (const i of data.items) {
+
+                const detalleVenta = await tx.detalleventa.findUnique({
+                    where: { id: i.ventaDetalleId }
+                });
+
+                if (!detalleVenta) {
+                    throw new Error('Detalle de venta inexistente');
+                }
+
+                if (detalleVenta.ventaId !== data.ventaId) {
+                    throw new Error('El detalle no pertenece a la venta');
+                }
+
+                const disponible =
+                    detalleVenta.cantidad - detalleVenta.cantidadAcreditada;
+
+                if (i.cantidad <= 0) {
+                    throw new Error('Cantidad inválida');
+                }
+
+                if (i.cantidad > disponible) {
+                    throw new Error(
+                        `Cantidad a acreditar supera lo disponible (${disponible})`
+                    );
+                }
+
+                total += i.cantidad * Number(detalleVenta.precioUnitario);
+
+                // actualizar detalle venta
+                await tx.detalleventa.update({
+                    where: { id: detalleVenta.id },
+                    data: {
+                        cantidadAcreditada: {
+                            increment: i.cantidad
+                        }
+                    }
+                });
+
+                // devolver stock
+                await tx.producto.update({
+                    where: { id: detalleVenta.productoId },
+                    data: {
+                        stock: { increment: i.cantidad }
+                    }
+                });
+            }
+
+            // 3️⃣ Crear nota de crédito
             const nota = await tx.nota_credito.create({
                 data: {
                     usuarioId: data.usuarioId,
                     clienteId: data.clienteId,
+                    ventaId: data.ventaId,
                     total,
                     detalles: {
                         create: data.items.map(i => ({
-                            productoId: i.productoId,
                             cantidad: i.cantidad,
-                            precioUnitario: i.precioUnitario
+                            precioUnitario: 0, // opcional: guardás el precio histórico
+                            ventaDetalle: {
+                                connect: { id: i.ventaDetalleId }
+                            }
                         }))
                     }
                 }
             });
 
-            // 🔁 restaurar stock
-            for (const i of data.items) {
-                await tx.producto.update({
-                    where: { id: i.productoId },
-                    data: { stock: { increment: i.cantidad } }
-                });
+            // 4️⃣ Recalcular estado de la venta
+            const detallesVenta = await tx.detalleventa.findMany({
+                where: { ventaId: data.ventaId }
+            });
+
+            const totalVendida = detallesVenta.reduce(
+                (s, d) => s + d.cantidad,
+                0
+            );
+
+            const totalAcreditada = detallesVenta.reduce(
+                (s, d) => s + d.cantidadAcreditada,
+                0
+            );
+
+            let nuevoEstado: 'ACTIVA' | 'PARCIALMENTE_ACREDITADA' | 'ACREDITADA' =
+                'ACTIVA';
+
+            if (totalAcreditada === totalVendida) {
+                nuevoEstado = 'ACREDITADA';
+            } else if (totalAcreditada > 0) {
+                nuevoEstado = 'PARCIALMENTE_ACREDITADA';
             }
+
+            await tx.venta.update({
+                where: { id: data.ventaId },
+                data: { estado: nuevoEstado }
+            });
 
             return nota;
         });
     }
 
-    listar() {
+    async listar() {
         return prisma.nota_credito.findMany({
             orderBy: { fecha: 'desc' },
             include: {
                 cliente: true,
                 usuario: true,
                 detalles: {
-                    include: { producto: true }
+                    include: {
+                        ventaDetalle: {
+                            include: {
+                                producto: true
+                            }
+                        }
+                    }
                 }
             }
         });

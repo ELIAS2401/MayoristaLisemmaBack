@@ -124,8 +124,20 @@ export class VentaRepository {
             }
         });
 
-        if (!venta || venta.estado === 'ANULADA') {
+        if (!venta) {
+            throw new Error('Venta inexistente');
+        }
+
+        if (venta.estado === 'ANULADA') {
             throw new Error('Venta inválida');
+        }
+
+        if (venta.detalles.some(d => d.cantidadAcreditada > 0)) {
+            throw new Error('No se puede anular una venta con nota de crédito asociada');
+        }
+
+        if (venta.estado !== 'ACTIVA') {
+            throw new Error('Solo se pueden anular ventas activas');
         }
 
         if (venta.notaCreditoId && venta.montoNotaUsado && venta.notaCredito) {
