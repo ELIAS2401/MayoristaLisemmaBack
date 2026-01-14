@@ -24,7 +24,5 @@ export class NotaCreditoService {
         return this.repo.listar();
     }
 
-    public listarPorVenta = async (ventaId: number) => {
-        return this.repo.listarPorVenta(ventaId);
-    }
+    
 }

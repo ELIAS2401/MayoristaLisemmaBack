@@ -12,7 +12,14 @@ export class VentaController {
     public crearVenta = async (req: Request, res: Response) => {
         try {
             console.log("USER EN REQUEST:", req.user);
-            const { clienteId, total, detalles } = req.body;
+            const {
+                clienteId,
+                total,
+                detalles,
+                notaCreditoId,
+                montoNotaUsado
+            } = req.body;
+
             const usuarioId = req.user.id; // 👈 VIENE DEL TOKEN
 
             if (!detalles || detalles.length === 0) {
@@ -23,7 +30,9 @@ export class VentaController {
                 clienteId,
                 total,
                 detalles,
-                usuarioId
+                usuarioId,
+                notaCreditoId,
+                montoNotaUsado
             });
 
             res.status(201).json(venta);
@@ -61,6 +70,6 @@ export class VentaController {
         }
     };
 
-  
+
 
 }

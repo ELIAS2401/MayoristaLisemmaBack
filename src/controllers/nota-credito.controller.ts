@@ -26,8 +26,4 @@ export class NotaCreditoController {
     listar = async (_: Request, res: Response) => {
         res.json(await service.listar());
     };
-
-    listarPorVenta = async (req: Request, res: Response) => {
-        res.json(await service.listarPorVenta(Number(req.params.ventaId)));
-    };
 }

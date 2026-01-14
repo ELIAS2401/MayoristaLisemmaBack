@@ -48,12 +48,15 @@ model venta {
   clienteId Int?
   usuarioId Int
   total     Decimal  @db.Decimal(10, 2)
-  estado    String   @default("ACTIVA") // ACTIVA | ANULADA
+  estado    String   @default("ACTIVA")
 
-  cliente      cliente?       @relation(fields: [clienteId], references: [id])
-  usuario      usuario        @relation(fields: [usuarioId], references: [id])
-  detalles     detalleventa[]
-  notasCredito nota_credito[]
+  notaCreditoId  Int? // 👈 NUEVO
+  montoNotaUsado Decimal? @db.Decimal(10, 2) // 👈 NUEVO
+
+  cliente     cliente?       @relation(fields: [clienteId], references: [id])
+  usuario     usuario        @relation(fields: [usuarioId], references: [id])
+  notaCredito nota_credito?  @relation(fields: [notaCreditoId], references: [id])
+  detalles    detalleventa[]
 }
 
 model detalleventa {
@@ -104,7 +107,6 @@ enum EstadoNotaCredito {
 
 model nota_credito {
   id        Int      @id @default(autoincrement())
-  ventaId   Int
   usuarioId Int
   fecha     DateTime @default(now())
   total     Decimal  @db.Decimal(10, 2)
@@ -112,12 +114,9 @@ model nota_credito {
   montoUsado Decimal           @default(0) @db.Decimal(10, 2)
   estado     EstadoNotaCredito @default(DISPONIBLE)
 
-  venta    venta                  @relation(fields: [ventaId], references: [id])
   usuario  usuario                @relation(fields: [usuarioId], references: [id])
+  ventas   venta[] // 👈 VENTAS QUE LA USARON
   detalles nota_credito_detalle[]
-
-  @@index([ventaId])
-  @@index([usuarioId])
 }
 
 model nota_credito_detalle {
