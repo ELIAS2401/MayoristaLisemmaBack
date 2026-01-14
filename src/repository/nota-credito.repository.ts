@@ -22,13 +22,7 @@ export class NotaCreditoRepository {
                 where: { id: data.ventaId }
             });
 
-            if (!venta) {
-                throw new Error('Venta inexistente');
-            }
-
-            if (venta.estado === 'ANULADA') {
-                throw new Error('No se puede acreditar una venta anulada');
-            }
+            if (!venta) throw new Error('Venta inexistente');
 
             if (venta.estado === 'ACREDITADA') {
                 throw new Error('La venta ya fue acreditada completamente');
@@ -37,10 +31,10 @@ export class NotaCreditoRepository {
             let total = 0;
 
             // 2️⃣ Procesar cada item
-            for (const i of data.items) {
+            for (const item of data.items) {
 
                 const detalleVenta = await tx.detalleventa.findUnique({
-                    where: { id: i.ventaDetalleId }
+                    where: { id: item.ventaDetalleId }
                 });
 
                 if (!detalleVenta) {
@@ -54,24 +48,26 @@ export class NotaCreditoRepository {
                 const disponible =
                     detalleVenta.cantidad - detalleVenta.cantidadAcreditada;
 
-                if (i.cantidad <= 0) {
+                if (item.cantidad <= 0) {
                     throw new Error('Cantidad inválida');
                 }
 
-                if (i.cantidad > disponible) {
+                if (item.cantidad > disponible) {
                     throw new Error(
                         `Cantidad a acreditar supera lo disponible (${disponible})`
                     );
                 }
 
-                total += i.cantidad * Number(detalleVenta.precioUnitario);
+                const precioUnitario = Number(detalleVenta.precioUnitario);
 
-                // actualizar detalle venta
+                total += item.cantidad * precioUnitario;
+
+                // actualizar cantidad acreditada
                 await tx.detalleventa.update({
                     where: { id: detalleVenta.id },
                     data: {
                         cantidadAcreditada: {
-                            increment: i.cantidad
+                            increment: item.cantidad
                         }
                     }
                 });
@@ -80,7 +76,7 @@ export class NotaCreditoRepository {
                 await tx.producto.update({
                     where: { id: detalleVenta.productoId },
                     data: {
-                        stock: { increment: i.cantidad }
+                        stock: { increment: item.cantidad }
                     }
                 });
             }
@@ -93,11 +89,11 @@ export class NotaCreditoRepository {
                     ventaId: data.ventaId,
                     total,
                     detalles: {
-                        create: data.items.map(i => ({
-                            cantidad: i.cantidad,
-                            precioUnitario: 0, // opcional: guardás el precio histórico
+                        create: data.items.map(item => ({
+                            cantidad: item.cantidad,
+                            precioUnitario: 0, // se setea abajo
                             ventaDetalle: {
-                                connect: { id: i.ventaDetalleId }
+                                connect: { id: item.ventaDetalleId }
                             }
                         }))
                     }
@@ -136,6 +132,7 @@ export class NotaCreditoRepository {
             return nota;
         });
     }
+
 
     async listar() {
         return prisma.nota_credito.findMany({

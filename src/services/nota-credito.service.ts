@@ -11,7 +11,6 @@ export class NotaCreditoService {
         items: {
             ventaDetalleId: number;
             cantidad: number;
-            precioUnitario: number;
         }[]
     ) {
         if (!items || items.length === 0) {
