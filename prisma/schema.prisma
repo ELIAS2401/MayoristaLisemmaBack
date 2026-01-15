@@ -36,6 +36,7 @@ model producto {
   costoUnitario  Decimal  @db.Decimal(10, 2)
   precioUnitario Decimal  @db.Decimal(10, 2)
   creadoEn       DateTime @default(now())
+  activo       Boolean  @default(true)
 
   categoria categoria?     @relation(fields: [categoriaId], references: [id])
   detalles  detalleventa[]
