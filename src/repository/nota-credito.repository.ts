@@ -29,6 +29,7 @@ export class NotaCreditoRepository {
             }
 
             let total = 0;
+            const itemsNota = [];
 
             // 2️⃣ Procesar cada item
             for (const item of data.items) {
@@ -62,6 +63,11 @@ export class NotaCreditoRepository {
 
                 total += item.cantidad * precioUnitario;
 
+                itemsNota.push({
+                    cantidad: item.cantidad,
+                    precioUnitario,
+                    ventaDetalleId: detalleVenta.id
+                });
                 // actualizar cantidad acreditada
                 await tx.detalleventa.update({
                     where: { id: detalleVenta.id },
@@ -89,11 +95,11 @@ export class NotaCreditoRepository {
                     ventaId: data.ventaId,
                     total,
                     detalles: {
-                        create: data.items.map(item => ({
-                            cantidad: item.cantidad,
-                            precioUnitario: 0, // se setea abajo
+                        create: itemsNota.map(i => ({
+                            cantidad: i.cantidad,
+                            precioUnitario: i.precioUnitario,
                             ventaDetalle: {
-                                connect: { id: item.ventaDetalleId }
+                                connect: { id: i.ventaDetalleId }
                             }
                         }))
                     }
