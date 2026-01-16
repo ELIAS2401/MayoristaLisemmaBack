@@ -57,13 +57,17 @@ model venta {
   total     Decimal  @db.Decimal(10, 2)
   estado EstadoVenta @default(ACTIVA)
 
-  notaCreditoId  Int? // 👈 NUEVO
-  montoNotaUsado Decimal? @db.Decimal(10, 2) // 👈 NUEVO
+  notaCreditoId  Int?
+  montoNotaUsado Decimal? @db.Decimal(10, 2)
 
   cliente     cliente?       @relation(fields: [clienteId], references: [id])
   usuario     usuario        @relation(fields: [usuarioId], references: [id])
   notaCredito nota_credito?  @relation(fields: [notaCreditoId], references: [id])
   detalles    detalleventa[]
+
+   @@index([usuarioId])
+  @@index([clienteId])
+  @@index([notaCreditoId])
 }
 
 model detalleventa {
@@ -130,6 +134,10 @@ model nota_credito {
   cliente  cliente                @relation(fields: [clienteId], references: [id])
   ventas   venta[]
   detalles nota_credito_detalle[]
+  
+  @@index([usuarioId])
+  @@index([clienteId])
+  @@index([ventaId])
 }
 
 model nota_credito_detalle {
