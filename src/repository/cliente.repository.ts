@@ -3,14 +3,16 @@ import { prisma } from "../prisma.js";
 export class ClienteRepository {
 
     async obtenerClientes() {
-        return prisma.cliente.findMany();
+        return prisma.cliente.findMany({
+            where: { activo: true }
+        });
     }
 
     async obtenerClientePorId(clienteId: number) {
-    return prisma.cliente.findUnique({
-        where: { id: clienteId },
-    });
-}
+        return prisma.cliente.findUnique({
+            where: { id: clienteId },
+        });
+    }
 
     async crearCliente(data: any) {
         return prisma.cliente.create({
@@ -19,8 +21,9 @@ export class ClienteRepository {
     }
 
     async eliminarCliente(clienteId: number) {
-        return prisma.cliente.delete({
-            where: { id: clienteId }
+        return prisma.cliente.update({
+            where: { id: clienteId },
+            data: { activo: false }
         });
     }
 

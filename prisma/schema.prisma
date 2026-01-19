@@ -24,6 +24,8 @@ model cliente {
   email         String?
   cuit          String  @unique
 
+  activo        Boolean @default(true)
+
   ventas       venta[]
   notaCreditos nota_credito[]
 }
