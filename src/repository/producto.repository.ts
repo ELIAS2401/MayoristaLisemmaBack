@@ -35,7 +35,6 @@ export class ProductoRepository {
     async updateProducto(productoId: number, data: any) {
 
         const {
-            stockAReponer,
             stock,
             ...resto
         } = data;
@@ -44,15 +43,13 @@ export class ProductoRepository {
             ...resto
         };
 
-        if (stockAReponer !== undefined) {
+        if (stock !== undefined) {
 
-            if (Number(stockAReponer) <= 0) {
-                throw new Error("La reposición debe ser mayor a 0");
+            if (Number(stock) < 0) {
+                throw new Error("El stock no puede ser negativo");
             }
 
-            updateData.stock = {
-                increment: Number(stockAReponer)
-            };
+            updateData.stock = Number(stock);
         }
 
         return prisma.producto.update({
@@ -60,6 +57,7 @@ export class ProductoRepository {
             data: updateData
         });
     }
+
 
 
 }

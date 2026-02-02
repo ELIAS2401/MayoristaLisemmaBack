@@ -68,7 +68,7 @@ export class ProductoController {
             });
 
         } catch (error: any) {
-            res.status(500).json({
+            res.status(400).json({
                 message: "Error al actualizar producto",
                 error: error.message
             });
