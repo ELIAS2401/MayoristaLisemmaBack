@@ -48,13 +48,18 @@ export class ProductoRepository {
             updateData.activo = Boolean(activo);
         }
 
-        if (stock !== undefined) {
+        if (stock !== undefined && stock !== null) {
+            const s = Number(stock);
 
-            if (Number(stock) < 0) {
+            if (Number.isNaN(s)) {
+                throw new Error("Stock inválido");
+            }
+
+            if (s < 0) {
                 throw new Error("El stock no puede ser negativo");
             }
 
-            updateData.stock = Number(stock);
+            updateData.stock = s;
         }
 
         return prisma.producto.update({

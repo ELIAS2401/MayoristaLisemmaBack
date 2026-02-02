@@ -59,7 +59,7 @@ export class ProductoController {
         try {
             const id = Number(req.params.id);
             const data = req.body;
-
+            console.log("DATA RECIBIDA:", data); // 👈 CLAVE
             const productoActualizado = await productoService.updateProducto(id, data);
 
             res.status(200).json({
