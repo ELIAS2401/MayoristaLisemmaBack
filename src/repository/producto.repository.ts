@@ -36,12 +36,17 @@ export class ProductoRepository {
 
         const {
             stock,
+            activo,
             ...resto
         } = data;
 
         const updateData: any = {
             ...resto
         };
+
+        if (activo !== undefined) {
+            updateData.activo = Boolean(activo);
+        }
 
         if (stock !== undefined) {
 
@@ -57,7 +62,4 @@ export class ProductoRepository {
             data: updateData
         });
     }
-
-
-
 }
