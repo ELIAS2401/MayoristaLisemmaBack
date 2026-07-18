@@ -84,13 +84,18 @@ export class NotaCreditoRepository {
                 });
             }
 
+            const totalCredito = itemsNota.reduce(
+                (sum, i) => sum + (i.cantidad * i.precioUnitario),
+                0
+            );
+
             // 3️⃣ Crear nota de crédito
             const nota = await tx.nota_credito.create({
                 data: {
                     usuarioId: data.usuarioId,
                     clienteId: data.clienteId,
                     ventaId: data.ventaId,
-                    total: 0,
+                    total: totalCredito,
                     detalles: {
                         create: itemsNota.map(i => ({
                             cantidad: i.cantidad,

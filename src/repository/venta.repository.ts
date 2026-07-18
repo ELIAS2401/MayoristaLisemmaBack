@@ -7,7 +7,19 @@ export class VentaRepository {
             include: {
                 cliente: true,
                 usuario: true,
-                notaCredito: true,
+                notasCredito: {
+                    include: {
+                        detalles: {
+                            include: {
+                                ventaDetalle: {
+                                    include: {
+                                        producto: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
                 detalles: {
                     include: {
                         producto: true
@@ -80,8 +92,7 @@ export class VentaRepository {
         const venta = await prisma.venta.findUnique({
             where: { id: ventaId },
             include: {
-                detalles: true,
-                notaCredito: true
+                detalles: true
             }
         });
 
