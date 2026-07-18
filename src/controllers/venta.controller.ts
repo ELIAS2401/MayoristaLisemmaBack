@@ -15,9 +15,7 @@ export class VentaController {
             const {
                 clienteId,
                 total,
-                detalles,
-                notaCreditoId,
-                montoNotaUsado
+                detalles
             } = req.body;
 
             const usuarioId = req.user.id; // 👈 VIENE DEL TOKEN
@@ -30,9 +28,7 @@ export class VentaController {
                 clienteId,
                 total,
                 detalles,
-                usuarioId,
-                notaCreditoId,
-                montoNotaUsado
+                usuarioId
             });
 
             res.status(201).json(venta);

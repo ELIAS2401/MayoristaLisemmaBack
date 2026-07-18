@@ -11,8 +11,6 @@ export class VentaService {
         clienteId?: number;
         usuarioId: number;
         total: number;
-        notaCreditoId?: number;
-        montoNotaUsado?: number;
         detalles: {
             productoId: number;
             cantidad: number;

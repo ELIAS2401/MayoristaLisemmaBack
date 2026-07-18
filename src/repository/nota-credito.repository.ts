@@ -28,7 +28,6 @@ export class NotaCreditoRepository {
                 throw new Error('La venta ya fue acreditada completamente');
             }
 
-            let total = 0;
             const itemsNota = [];
 
             // 2️⃣ Procesar cada item
@@ -61,8 +60,6 @@ export class NotaCreditoRepository {
 
                 const precioUnitario = Number(detalleVenta.precioUnitario);
 
-                total += item.cantidad * precioUnitario;
-
                 itemsNota.push({
                     cantidad: item.cantidad,
                     precioUnitario,
@@ -93,7 +90,7 @@ export class NotaCreditoRepository {
                     usuarioId: data.usuarioId,
                     clienteId: data.clienteId,
                     ventaId: data.ventaId,
-                    total,
+                    total: 0,
                     detalles: {
                         create: itemsNota.map(i => ({
                             cantidad: i.cantidad,
