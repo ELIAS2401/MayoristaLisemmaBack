@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma.js";
 export class VentaRepository {
 
@@ -40,7 +41,7 @@ export class VentaRepository {
         }[];
     }) {
 
-        return prisma.$transaction(async (tx) => {
+        return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
 
             console.log("=== INICIO TRANSACCIÓN ===");
             console.log("Cantidad de productos:", data.detalles.length);
@@ -123,7 +124,7 @@ export class VentaRepository {
             throw new Error('Venta inválida');
         }
 
-        if (venta.detalles.some(d => d.cantidadAcreditada > 0)) {
+        if (venta.detalles.some((d) => d.cantidadAcreditada > 0)) {
             throw new Error('No se puede anular una venta con nota de crédito asociada');
         }
 

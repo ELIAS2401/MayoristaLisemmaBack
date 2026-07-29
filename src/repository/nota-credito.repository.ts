@@ -1,4 +1,5 @@
-import { prisma } from '../prisma.js';
+import { Prisma } from "@prisma/client";
+import { prisma } from "../prisma.js";
 
 export class NotaCreditoRepository {
 
@@ -11,7 +12,7 @@ export class NotaCreditoRepository {
             cantidad: number;
         }[];
     }) {
-        return prisma.$transaction(async (tx) => {
+        return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
 
             // 1️⃣ Validaciones iniciales
             if (!data.items || data.items.length === 0) {
@@ -85,7 +86,7 @@ export class NotaCreditoRepository {
             }
 
             const totalCredito = itemsNota.reduce(
-                (sum, i) => sum + (i.cantidad * i.precioUnitario),
+                (sum: number, i) => sum + (i.cantidad * i.precioUnitario),
                 0
             );
 
@@ -114,12 +115,12 @@ export class NotaCreditoRepository {
             });
 
             const totalVendida = detallesVenta.reduce(
-                (s, d) => s + d.cantidad,
+                (s: number, d) => s + d.cantidad,
                 0
             );
 
             const totalAcreditada = detallesVenta.reduce(
-                (s, d) => s + d.cantidadAcreditada,
+                (s: number, d) => s + d.cantidadAcreditada,
                 0
             );
 
