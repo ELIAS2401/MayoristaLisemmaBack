@@ -40,55 +40,76 @@ export class VentaRepository {
         }[];
     }) {
 
-        return prisma.$transaction(async (tx) => {
+        return prisma.$transaction(
+            async (tx) => {
 
-            // 1️⃣ Validar stock
-            for (const d of data.detalles) {
-                const producto = await tx.producto.findUnique({
-                    where: { id: d.productoId }
-                });
+                console.log("=== INICIO TRANSACCIÓN ===");
+                console.log("Cantidad de productos:", data.detalles.length);
 
-                if (!producto) {
-                    throw new Error("Producto no encontrado");
-                }
+                // 1️⃣ Validar stock
+                for (const d of data.detalles) {
 
-                if ((producto.stock ?? 0) < d.cantidad) {
-                    throw new Error(`Stock insuficiente para ${producto.nombre}`);
-                }
-            }
+                    console.log(`Validando producto ${d.productoId}`);
 
-            // 2️⃣ Crear venta
-            const venta = await tx.venta.create({
-                data: {
-                    clienteId: data.clienteId,
-                    usuarioId: data.usuarioId,
-                    total: data.total,
-                    detalles: {
-                        create: data.detalles.map(d => ({
-                            productoId: d.productoId,
-                            cantidad: d.cantidad,
-                            precioUnitario: d.precioUnitario
-                        }))
+                    const producto = await tx.producto.findUnique({
+                        where: { id: d.productoId }
+                    });
+
+                    if (!producto) {
+                        throw new Error(`Producto ${d.productoId} no encontrado`);
+                    }
+
+                    if ((producto.stock ?? 0) < d.cantidad) {
+                        throw new Error(`Stock insuficiente para ${producto.nombre}`);
                     }
                 }
-            });
-            // 3️⃣ Descontar stock
-            for (const d of data.detalles) {
-                await tx.producto.update({
-                    where: { id: d.productoId },
+
+                console.log("Stock validado");
+
+                // 2️⃣ Crear venta
+                const venta = await tx.venta.create({
                     data: {
-                        stock: {
-                            decrement: d.cantidad
+                        clienteId: data.clienteId,
+                        usuarioId: data.usuarioId,
+                        total: data.total,
+                        detalles: {
+                            create: data.detalles.map(d => ({
+                                productoId: d.productoId,
+                                cantidad: d.cantidad,
+                                precioUnitario: d.precioUnitario
+                            }))
                         }
                     }
                 });
+
+                console.log("Venta creada:", venta.id);
+
+                // 3️⃣ Descontar stock
+                for (const d of data.detalles) {
+
+                    console.log(`Descontando stock del producto ${d.productoId}`);
+
+                    await tx.producto.update({
+                        where: { id: d.productoId },
+                        data: {
+                            stock: {
+                                decrement: d.cantidad
+                            }
+                        }
+                    });
+
+                    console.log(`Stock actualizado del producto ${d.productoId}`);
+                }
+
+                console.log("=== FIN TRANSACCIÓN ===");
+
+                return venta;
+            },
+            {
+                maxWait: 10000,
+                timeout: 15000
             }
-            return venta;
-        },
-        {
-            maxWait: 10000,
-            timeout: 15000
-        });
+        );
     }
 
     async anularVenta(ventaId: number) {
