@@ -84,6 +84,10 @@ export class VentaRepository {
                 });
             }
             return venta;
+        },
+        {
+            maxWait: 10000,
+            timeout: 15000
         });
     }
 
