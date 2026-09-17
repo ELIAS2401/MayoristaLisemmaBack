@@ -174,47 +174,77 @@ export class VentaRepository {
             timeout: 15000 // Aumentado a 15s para evitar 400 Bad Request por timeout
         });
     }
+    // async anularVenta(ventaId: number) {
+
+    //     const venta = await prisma.venta.findUnique({
+    //         where: { id: ventaId },
+    //         include: {
+    //             detalles: true
+    //         }
+    //     });
+
+    //     if (!venta) {
+    //         throw new Error('Venta inexistente');
+    //     }
+
+    //     if (venta.estado === 'ANULADA') {
+    //         throw new Error('Venta inválida');
+    //     }
+
+    //     if (venta.detalles.some((d) => d.cantidadAcreditada > 0)) {
+    //         throw new Error('No se puede anular una venta con nota de crédito asociada');
+    //     }
+
+    //     if (venta.estado !== 'ACTIVA') {
+    //         throw new Error('Solo se pueden anular ventas activas');
+    //     }
+
+    //     // 🔁 restaurar stock
+    //     for (const detalle of venta.detalles) {
+    //         await prisma.producto.update({
+    //             where: { id: detalle.productoId },
+    //             data: {
+    //                 stock: { increment: detalle.cantidad }
+    //             }
+    //         });
+    //     }
+
+    //     // marcar venta como anulada
+    //     return prisma.venta.update({
+    //         where: { id: ventaId },
+    //         data: {
+    //             estado: 'ANULADA'
+    //         }
+    //     });
+    // }
     async anularVenta(ventaId: number) {
-
-        const venta = await prisma.venta.findUnique({
-            where: { id: ventaId },
-            include: {
-                detalles: true
-            }
-        });
-
-        if (!venta) {
-            throw new Error('Venta inexistente');
-        }
-
-        if (venta.estado === 'ANULADA') {
-            throw new Error('Venta inválida');
-        }
-
-        if (venta.detalles.some((d) => d.cantidadAcreditada > 0)) {
-            throw new Error('No se puede anular una venta con nota de crédito asociada');
-        }
-
-        if (venta.estado !== 'ACTIVA') {
-            throw new Error('Solo se pueden anular ventas activas');
-        }
-
-        // 🔁 restaurar stock
-        for (const detalle of venta.detalles) {
-            await prisma.producto.update({
-                where: { id: detalle.productoId },
-                data: {
-                    stock: { increment: detalle.cantidad }
-                }
+        return prisma.$transaction(async (tx) => {
+            const venta = await tx.venta.findUnique({
+                where: { id: ventaId },
+                include: { detalles: true }
             });
-        }
 
-        // marcar venta como anulada
-        return prisma.venta.update({
-            where: { id: ventaId },
-            data: {
-                estado: 'ANULADA'
+            if (!venta) throw new Error('Venta inexistente');
+            if (venta.estado === 'ANULADA') throw new Error('Venta inválida');
+            if (venta.detalles.some((d) => d.cantidadAcreditada > 0)) {
+                throw new Error('No se puede anular una venta con nota de crédito asociada');
             }
+            if (venta.estado !== 'ACTIVA') throw new Error('Solo se pueden anular ventas activas');
+
+            // Restaurar stock en paralelo dentro de la transacción
+            await Promise.all(
+                venta.detalles.map(detalle =>
+                    tx.producto.update({
+                        where: { id: detalle.productoId },
+                        data: { stock: { increment: detalle.cantidad } }
+                    })
+                )
+            );
+
+            return tx.venta.update({
+                where: { id: ventaId },
+                data: { estado: 'ANULADA' }
+            });
         });
     }
 
